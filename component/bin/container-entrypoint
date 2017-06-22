@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+
+source /opt/app-root/etc/postgres_environment
+exec docker-entrypoint.sh postgres

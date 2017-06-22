@@ -1,0 +1,27 @@
+sudo: required
+matrix:
+  include:
+  - services:
+    - docker
+    env: VARIANTS=default
+  - services:
+    - docker
+    env: VARIANTS=alpine
+before_install:
+- |
+  go get github.com/openshift/source-to-image
+  pushd ${GOPATH}/src/github.com/openshift/source-to-image
+  export PATH=$PATH:${GOPATH}/src/github.com/openshift/source-to-image/_output/local/bin/linux/amd64/
+  hack/build-go.sh
+  popd
+script:
+- if [ "$TRAVIS_BRANCH" = "master" ]; then export DOCKER_PUSH=true && docker login
+  -u="$DOCKER_USER" -p="$DOCKER_PASS" quay.io; fi
+- "./hack/run build"
+notifications:
+  slack:
+    secure: rADx78zxQr8jhCPYtOdF/lacLMjsVz2XWfxlWxwZuPGrjlYWlWiwkK6mKGZXDgsXI7tohqOoLaMjyHhGeOKYrGDYRmgsSGPcj3jh+LjtICgQjOkvKNMxaNnb9lelTVvpSTYLn2XJBCyIbTc/pnH/f4ySHgCCVuU+ANQJ2xAusInvx/UXafpBL7iqnxZakHtK/iaC4dH7Rg63b0vXQ86CVPl7k2C9OZawTT8aer3ElV0Nw4nRBrA7FWe781DbP35T7jXTNZFEh7ovoOjg1ho3RFOt+rwPKDlkH/j38SoJHtBzi6mKEWVY5RasAxI3r+DqYQCq8d3kl/69K8UEHmW34AEcJNyDQnm9kHMy+8cn0ufjcV3NdcvQ6qIS3XqdQV5q1eTbZmGPj5EvXiRpfaEoqor1T2nadFTIDy7axVZULZpwAkJSsnRC6TiicQG7787FiWCDijWJeI5ogqit6O+ScEYeE1ITXyHMu6h1lgybqbF2RCdYJvxSHPE3iMLTFrqaFzOxP9QtX7XSZuOQVYhExNb2EZ9vcMGFFOJ1+16bZTPTqDOwjL6FGfX1VegLvjEMOMCLp3cpMvFcdA/BWVhqCOKITyQnKVHZxbdnNiZ2EPiAmY4ZoSerXec2y6bvu5B2d1TB8Vqa7Ven1kv7peRiy/aeS80ms1hHE7nTLzigXOQ=
+env:
+  global:
+  - secure: WrbSUA5qtA22w6/z5y+Q3L2U45OscTz47IrKdNDGp4LFMRULPRil+bvmUjSCOTqnkxdrKF+g1ceMPiStvxHhhCp+uLXqaYw+dFXPIcTyutnFoBTTTDoYrkY58PMDZHRhTjwT+jXC6M3Mw2JFtxD9RuIckVWDFh1+N1iWLH/0Y4f5bVLJ79U5wShHlpHbOMnmq1EMNNcPZMH9ty/eiEJEXChpGFw9WrloUR1EGz/FlpoITnsqxamTbJ19oZA3NaZ3yiow3nSBPsP4Q8QbE1PDciI/Dxy8n2f2XjM+pXuuHTLXYifig2Ci70607CYLsmGZUL/2XzSkznF0sCRnxxmErH70RVH5t0ZBNRxlNM0elBcDiDYPn4MUgtwUES6F5PrA5LyzgS2vS9LV4R/7KgPNVQWK6AgUqUZ5Ot+Do8lYpjokfjD7meEV1UkM9AWI5prubBEVMG0YIRyXfvgT1bepiQO1zkB23dA+iDpyG2ym5IevnQh7SMGsKFgwNfBpsBXmR3j6UI/eWGSqRtIEvE8mBoA/zT5kLv/+5TwfJYkuJtqavgZ60f1RZQ3gECPIMAlfE1ZFsuQGxL30qj4UauLhkYlq7uJ4KErhZ8n+wWPjh5iBd2hdWpErSiAed/EiwoQ0h6Dyzk0c9Qy8tiPkedcGhTZ9h1g6W8U0WDBisw2kVCU=
+  - secure: faVVMuPyABWWTG6rzuswqBVQvQSqs5ZpMMS7fQNqMHj2uAnINPqPWvh+l05m6mLETIFam8vZHJvmh/NTmufo5AFCkgmdCBfuhBvU8yPGns3x8v4if8aIA9L5cI8/fSUuzgRIuUR8mQ2mutdFd0Pcltd4t9upnOZEmALqNKQOegJdDfzuwGAgs7UOc35112y0B1ZySPDYHF24veS1Z3R+vnb0Xh7lm4FVWbS9O9LVwpnBn4bcFR1JkD4dpeTdD8Gi34LfEbtOIAobUQyeVoS5GBULPvReHXPr4TCvN4Co8+ky+EQkNgfkKJ/xVkUrDKLL67gLyW2wPq5gGQG440sa6Evy5YJ4TZxSHAW5EdImfullVkPKdGaC2lUbjDEOgBUtd0EhpCRCDKhXS0MmbM6jFJBF4A/XnxKTR+mZ5jqYS/tXz7apebI4WsaTlKOd01gi1rBIbLeXU2FlLddMQAvXIXnjH9DuJy+659Bt7IIrmba8a4IBkr+/p2tCFzdPYU1d8buuL9EzUjEFTZ1EGyvOHfFSJVXW+2qIw2lF24NfOqkdeh6Tg8o8WKQL2PbsksZNaooalnkD3cp1QQbxgfz7NqnZO3+m9+sY7lPTY6v7I0dbd2BZqR5pP2AFKQcmCsepXNwis69gZk2XX0UAF0AAdSmt4Dw/sqspDgtQYTUEIrw=

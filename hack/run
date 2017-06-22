@@ -1,0 +1,11 @@
+#!/bin/bash
+
+NAME="postgres"
+DISPLAY_NAME="PostgreSQL"
+TYPE="component"
+VARIANTS=${VARIANTS:-"default,alpine"}
+VERSIONS=${VERSIONS:-"9.6"}
+
+DOCKER_PUSH=${DOCKER_PUSH:-"false"}
+
+source $(readlink -zf $(dirname "${BASH_SOURCE[0]}"))/../common/hack/run
